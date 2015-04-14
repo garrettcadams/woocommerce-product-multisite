@@ -30,38 +30,38 @@ Author URI: http://sethrubenstein.info
  * **********************************************************************
  */
 
-function apollo_add_course_product_type( $types ){
-    $types[ 'apollo_course_product' ] = __( 'Course product' );
+function add_multisite_product_type( $types ){
+    $types[ 'mutlisite_product' ] = __( 'Multisite product' );
     return $types;
 }
-add_filter( 'product_type_selector', 'apollo_add_course_product_type' );
+add_filter( 'product_type_selector', 'add_multisite_product_type' );
 
-function apollo_create_course_product_type(){
+function create_multisite_product_type(){
     // declare the product class
-    class WC_Product_Apollo extends WC_Product{
+    class WC_Product_Multisite extends WC_Product{
         public function __construct( $product ) {
-            $this->product_type = 'apollo_course_product';
+            $this->product_type = 'mutlisite_product';
             parent::__construct( $product );
             // add additional functions here
         }
     }
 }
-add_action( 'plugins_loaded', 'apollo_create_course_product_type' );
+add_action( 'plugins_loaded', 'create_multisite_product_type' );
 
-function apollo_course_product_options_start_buffer(){
+function multisite_product_options_start_buffer(){
     ob_start();
 }
 
-function apollo_course_product_options_end_buffer(){
+function multisite_product_options_end_buffer(){
     // Get value of buffering so far
     $getContent = ob_get_contents();
 
     // Stop buffering
     ob_end_clean();
 
-    $getContent = str_replace('options_group pricing show_if_simple show_if_external', 'options_group pricing show_if_simple show_if_external show_if_apollo_course_product', $getContent);
+    $getContent = str_replace('options_group pricing show_if_simple show_if_external', 'options_group pricing show_if_simple show_if_external show_if_multisite_product', $getContent);
     echo $getContent;
 }
 
-add_action('woocommerce_product_options_sku', 'apollo_course_product_options_start_buffer');
-add_action('woocommerce_product_options_pricing', 'apollo_course_product_options_end_buffer');
+add_action('woocommerce_product_options_sku', 'multisite_product_options_start_buffer');
+add_action('woocommerce_product_options_pricing', 'multisite_product_options_end_buffer');
