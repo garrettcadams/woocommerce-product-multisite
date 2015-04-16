@@ -22,7 +22,17 @@ function cliffmichaels_ms_create_site( $order ) {
 	global $woocommerce;
     $user_id = get_current_user_id();
 
-    $order = new WC_Order($order);
+    /**
+	 * We're checking to see if this is the "thank you page"
+	 * if so then we're initiating a new WC_Order class using the order id from $order.
+	 */
+	$current_page =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+	$escaped_link = htmlspecialchars($current_page, ENT_QUOTES, 'UTF-8');
+	$link = parse_url($escaped_link);
+	$page_path = $link['path'];
+	if (strpos($page_path,'order-received') !== false) {
+		$order = new WC_Order($order);
+	}
 
 	// Loop through purchased items in order and add
 	if ( sizeof( $order->get_items() ) > 0 ) {
@@ -32,7 +42,9 @@ function cliffmichaels_ms_create_site( $order ) {
                 echo '<script>console.log("Site Creation Process Begun");</script>';
     			// Here we're adding a custom meta to each user with the product id
                 if (!get_user_meta( $user_id, 'site_created_'.$product_id.'', true ) ) {
-                    add_user_meta( $user_id, 'site_created_'.$product_id.'', 'purchased' );
+                    add_user_meta( $user_id, 'site_created_'.$product_id.'', 'true' );
+                    $user = new WP_User( $user_id );
+                    $user->add_cap( 'manage_white_label' );
                     wpmu_create_blog(  'cliffmichaels.dev',  '/test-site/',  'Test Site',  $user_id );
                     echo '<script>console.log("Authentication of '.$product_id.' Successful");</script>';
                     $notification_markup = '';
