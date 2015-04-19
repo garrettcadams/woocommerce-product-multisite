@@ -16,6 +16,53 @@ function get_cliffmichaels_ms_product_id() {
     }
 }
 
+function cliffmichales_ms_checkout_fields( $checkout ) {
+    global $woocommerce;
+
+    foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+		$_product = $values['data'];
+
+		if( get_cliffmichaels_ms_product_id() == $_product->id ) {
+            echo '<div id="cm_ms_site_info"><h2>' . __('Site Name:') . '</h2>';
+
+            woocommerce_form_field( 'cliff_ms_site_name', array(
+                'type'          => 'text',
+                'class'         => array('my-field-class form-row-wide'),
+                'label'         => __('The name you would like to call your site, this will also be shortened into your access url. So Acme University would become cliffmichaels.com/acme-university.'),
+                'placeholder'   => __('Acme University'),
+            ), $checkout->get_value( 'cliff_ms_site_name' ));
+
+            echo '</div>';
+		}
+	}
+
+}
+add_action( 'woocommerce_after_order_notes', 'cliffmichales_ms_checkout_fields' );
+
+function cliffmichaels_ms_validate_checkout() {
+    global $woocommerce;
+
+    foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+		$_product = $values['data'];
+        // Check if set, if its not set add an error.
+		if( get_cliffmichaels_ms_product_id() == $_product->id && ! $_POST['cliff_ms_site_name']) {
+                wc_add_notice( __( 'Please give us a site name.' ), 'error' );
+        }
+    }
+}
+add_action( 'woocommerce_checkout_process', 'cliffmichaels_ms_validate_checkout' );
+
+function cliffmichaels_ms_update_order_meta( $order_id ) {
+    if ( ! empty( $_POST['cliff_ms_site_name'] ) ) {
+        $user_id = get_current_user_id();
+        update_post_meta( $order_id, 'cm_ms_site_name', sanitize_text_field( $_POST['cliff_ms_site_name'] ) );
+
+        $site_name = preg_replace("/[^\w]+/", "-", $_POST['cliff_ms_site_name']);
+        update_post_meta( $order_id, 'cm_ms_site_url', strtolower($site_name) );
+        add_user_meta( $user_id, 'site_url', strtolower($site_name) );
+    }
+}
+add_action( 'woocommerce_checkout_update_order_meta', 'cliffmichaels_ms_update_order_meta' );
 
 // Once the user has checked out we need to create the new site...
 function cliffmichaels_ms_create_site( $order ) {
@@ -45,7 +92,9 @@ function cliffmichaels_ms_create_site( $order ) {
                     add_user_meta( $user_id, 'site_created_'.$product_id.'', 'true' );
                     $user = new WP_User( $user_id );
                     $user->add_cap( 'manage_white_label' );
-                    wpmu_create_blog(  'cliffmichaels.dev',  '/test-site/',  'Test Site',  $user_id );
+                    $site_name = get_post_meta($order->id, 'cm_ms_site_name', true);
+                    $site_url = get_post_meta($order->id, 'cm_ms_site_url', true);
+                    wpmu_create_blog(  'cliffmichaels.dev',  '/'.$site_url.'/',  ''.$site_name.'',  $user_id );
                     echo '<script>console.log("Authentication of '.$product_id.' Successful");</script>';
                     $notification_markup = '';
                     echo $notification_markup;
@@ -84,3 +133,13 @@ function cliffmichaels_ms_hijack_thankyou() {
 	}
 }
 add_action('wp_head','cliffmichaels_ms_hijack_thankyou');
+
+function cliffmichaels_ms_thankyou_text() {
+    $user_id = get_current_user_id();
+    $new_site_url = get_user_meta( $user_id, 'site_url', true );
+    ?>
+    <br>
+    <center><a href="<?php bloginfo('url');?>/<?php echo $new_site_url;?>/" class="button">Click Here to Setup Your New Site</a></center>
+    <?php
+}
+add_filter( 'woocommerce_thankyou_order_received_text', 'cliffmichaels_ms_thankyou_text', 2 );
