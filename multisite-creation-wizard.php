@@ -112,6 +112,15 @@ function cliffmichaels_ms_initial_site_setup($blog_id){
     switch_to_blog($blog_id);
     switch_theme('cliff-michaels-whitelabel');
     activate_plugin( 'woocommerce/woocommerce.php' );
+    $manager_page = array(
+        'post_content'   => 'Manage Users',
+        'post_name'      => 'manager-dashboard',
+        'post_title'     => 'User Management Dashboard',
+        'post_status'    => 'publish',
+        'post_type'      => 'page',
+        'page_template'  => 'page-manager-dashboard.php'
+    );
+    wp_insert_post( $manager_page );
     restore_current_blog();
 }
 
@@ -143,3 +152,53 @@ function cliffmichaels_ms_thankyou_text() {
     <?php
 }
 add_filter( 'woocommerce_thankyou_order_received_text', 'cliffmichaels_ms_thankyou_text', 2 );
+
+if( function_exists('register_field_group') ):
+
+register_field_group(array (
+	'key' => 'group_552f06212ef31',
+	'title' => 'White Label Options',
+	'fields' => array (
+		array (
+			'key' => 'field_552f062fb2076',
+			'label' => 'Subscription Product ID',
+			'name' => 'subscription_product_id',
+			'prefix' => '',
+			'type' => 'number',
+			'instructions' => '',
+			'required' => 0,
+			'conditional_logic' => 0,
+			'wrapper' => array (
+				'width' => '',
+				'class' => '',
+				'id' => '',
+			),
+			'default_value' => '',
+			'placeholder' => '',
+			'prepend' => '',
+			'append' => '',
+			'min' => '',
+			'max' => '',
+			'step' => '',
+			'readonly' => 0,
+			'disabled' => 0,
+		),
+	),
+	'location' => array (
+		array (
+			array (
+				'param' => 'options_page',
+				'operator' => '==',
+				'value' => 'acf-options',
+			),
+		),
+	),
+	'menu_order' => 0,
+	'position' => 'normal',
+	'style' => 'default',
+	'label_placement' => 'top',
+	'instruction_placement' => 'label',
+	'hide_on_screen' => '',
+));
+
+endif;
