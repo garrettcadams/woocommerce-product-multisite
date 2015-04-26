@@ -23,12 +23,12 @@ function cliffmichales_ms_checkout_fields( $checkout ) {
 		$_product = $values['data'];
 
 		if( get_cliffmichaels_ms_product_id() == $_product->id ) {
-            echo '<div id="cm_ms_site_info"><h2>' . __('Site Name:') . '</h2>';
+            echo '<div id="cm_ms_site_info"><h2>' . __('Your organization name:') . '</h2>';
 
             woocommerce_form_field( 'cliff_ms_site_name', array(
                 'type'          => 'text',
                 'class'         => array('my-field-class form-row-wide'),
-                'label'         => __('The name you would like to call your site, this will also be shortened into your access url. So Acme University would become cliffmichaels.com/acme-university.'),
+                'label'         => __('This will be the name of your page or website to offer cliff Michaels courses and products. Your name is also your URL eg. Acme University would be http://cliffmichaels.com/acme-university'),
                 'placeholder'   => __('Acme University'),
             ), $checkout->get_value( 'cliff_ms_site_name' ));
 
@@ -104,7 +104,7 @@ function cliffmichaels_ms_create_site( $order ) {
             }
 		}
 	} else {
-        echo '<div class="error"><strong>ERROR1001</strong Your site was not create. Please contact support and let them know your error code (1001) to resolve this issue.</div>';
+        echo '<div class="error"><strong>ERROR1001</strong Your site was not created. Please contact support and let them know your error code (1001) to resolve this issue.</div>';
     }
 }
 
@@ -147,8 +147,12 @@ function cliffmichaels_ms_thankyou_text() {
     $user_id = get_current_user_id();
     $new_site_url = get_user_meta( $user_id, 'site_url', true );
     ?>
-    <br>
-    <center><a href="<?php bloginfo('url');?>/<?php echo $new_site_url;?>/" class="button">Click Here to Setup Your New Site</a></center>
+    <a href="<?php bloginfo('url');?>/<?php echo $new_site_url;?>/" class="button checkout-action"><span class="step always-show">1.</span> Proceed to Setup</a>
+    <script>
+    jQuery(document).ready(function(){
+        jQuery('.checkout-action:last-of-type').insertBefore('.checkout-action:first-of-type');
+    });
+    </script>
     <?php
 }
 add_filter( 'woocommerce_thankyou_order_received_text', 'cliffmichaels_ms_thankyou_text', 2 );
