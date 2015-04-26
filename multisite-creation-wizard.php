@@ -3,7 +3,7 @@
 Plugin Name: Cliff Michaels Mutlisite Creation Wizard
 Plugin URI: http://sethrubenstein.info/plugins
 Description: This plugin offers functionality to cliffmichaels.com that would allow for a subscription product for multisite.
-Version: 0.1
+Version: 4.26.15
 Author: Seth Rubenstein
 Author URI: http://sethrubenstein.info
 */
