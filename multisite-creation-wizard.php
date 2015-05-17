@@ -91,10 +91,12 @@ function cliffmichaels_ms_create_site( $order ) {
                 if (!get_user_meta( $user_id, 'site_created_'.$product_id.'', true ) ) {
                     add_user_meta( $user_id, 'site_created_'.$product_id.'', 'true' );
                     $user = new WP_User( $user_id );
-                    $user->add_cap( 'manage_white_label' );
                     $site_name = get_post_meta($order->id, 'cm_ms_site_name', true);
                     $site_url = get_post_meta($order->id, 'cm_ms_site_url', true);
-                    wpmu_create_blog(  'cliffmichaels.dev',  '/'.$site_url.'/',  ''.$site_name.'',  $user_id );
+                    //
+                    $blog_id = wpmu_create_blog(  'cliffmichaels.dev',  '/'.$site_url.'/',  ''.$site_name.'',  $user_id );
+                    add_user_meta( $user_id, 'site_owner', $user_id );
+                    wp_update_user( array( 'ID' => $user_id, 'role' => 'white_label_manager' ) );
                     echo '<script>console.log("Authentication of '.$product_id.' Successful");</script>';
                     $notification_markup = '';
                     echo $notification_markup;
@@ -107,7 +109,6 @@ function cliffmichaels_ms_create_site( $order ) {
         echo '<div class="error"><strong>ERROR1001</strong Your site was not created. Please contact support and let them know your error code (1001) to resolve this issue.</div>';
     }
 }
-
 function cliffmichaels_ms_initial_site_setup($blog_id){
     switch_to_blog($blog_id);
     switch_theme('cliff-michaels-whitelabel');
@@ -121,6 +122,7 @@ function cliffmichaels_ms_initial_site_setup($blog_id){
         'page_template'  => 'page-manager-dashboard.php'
     );
     wp_insert_post( $manager_page );
+    $user_role_change = wp_update_user( array( 'ID' => get_current_user_id(), 'role' => 'white_label_manager' ) );
     restore_current_blog();
 }
 
